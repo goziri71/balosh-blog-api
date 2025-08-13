@@ -1,5 +1,5 @@
 import express from "express";
-import { authorize } from "../middleware/auth.js";
+import { authorize, optionalAuth } from "../middleware/auth.js";
 import { uploadBlogMedia, handleMulterError } from "../middleware/multer.js";
 import {
   createBlog,
@@ -22,6 +22,8 @@ router.get("/:slug", getBlogBySlug);
 router.post("/", authorize, uploadBlogMedia, handleMulterError, createBlog);
 router.put("/:id", authorize, uploadBlogMedia, handleMulterError, updateBlog);
 router.delete("/:id", authorize, deleteBlog);
-router.post("/:id/like", authorize, toggleLike);
+
+// Public like endpoint - optional authentication (works for both anonymous and logged-in users)
+router.post("/:id/like", optionalAuth, toggleLike);
 
 export default router;

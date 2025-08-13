@@ -484,7 +484,21 @@ featuredImage: [FILE] (optional - new image/video)
 
 **POST** `/blogs/{id}/like`
 
-- **Requires:** Bearer token
+- **Public endpoint** - No authentication required
+- **Optional authentication** - If user is logged in, tracks authenticated likes
+
+**Features:**
+
+- **Anonymous users** can like/unlike using IP + browser fingerprint
+- **Authenticated users** get proper user tracking
+- **Persistent likes** - anonymous likes persist based on browser/IP
+- **Real-time updates** - instant like count updates
+
+**Headers (Optional):**
+
+```
+Authorization: Bearer <your-token>  // Optional - for authenticated users
+```
 
 **Response (200):**
 
@@ -498,6 +512,12 @@ featuredImage: [FILE] (optional - new image/video)
   }
 }
 ```
+
+**Use Cases:**
+
+- **Anonymous visitor** clicks like → uses IP/browser tracking
+- **Logged-in user** clicks like → uses user ID tracking
+- **Mixed usage** → both types of likes count toward total
 
 ### Get Blog Statistics
 

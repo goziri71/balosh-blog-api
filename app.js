@@ -10,6 +10,9 @@ import categoryRouter from "./src/routes/categories.js";
 const app = express();
 const port = Config.PORT;
 
+// Trust proxy to get real IP addresses for anonymous user tracking
+app.set("trust proxy", true);
+
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cors());

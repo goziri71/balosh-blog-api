@@ -547,49 +547,73 @@ export const deleteBlog = async (req, res) => {
 };
 
 // Toggle blog like
-export const toggleLike = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const userId = req.user._id;
+export const toggleLike = TryCatchFunction(async (req, res) => {
+  const { id } = req.params;
 
-    const blog = await Blog.findById(id);
-    if (!blog) {
-      return res.status(404).json({
-        success: false,
-        message: "Blog not found",
-      });
-    }
+  // Get user identifier (authenticated user ID or anonymous identifier)
+  let userIdentifier;
+  let isAuthenticated = false;
 
-    // Check if user already liked the blog
-    const existingLike = blog.likes.find(
-      (like) => like.user.toString() === userId.toString()
-    );
-
-    if (existingLike) {
-      // Remove like
-      blog.likes = blog.likes.filter(
-        (like) => like.user.toString() !== userId.toString()
-      );
-    } else {
-      // Add like
-      blog.likes.push({ user: userId });
-    }
-
-    await blog.save();
-
-    res.json({
-      success: true,
-      message: existingLike ? "Like removed" : "Blog liked",
-      data: { likeCount: blog.likes.length, isLiked: !existingLike },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error toggling like",
-      error: error.message,
-    });
+  // Check if user is authenticated
+  if (req.user) {
+    userIdentifier = req.user.toString();
+    isAuthenticated = true;
+  } else {
+    // For anonymous users, use IP address + user agent as identifier
+    const clientIP =
+      req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+    const userAgent = req.get("User-Agent") || "";
+    userIdentifier = `anonymous_${Buffer.from(clientIP + userAgent)
+      .toString("base64")
+      .slice(0, 20)}`;
   }
-};
+
+  // Validate blog ID format
+  if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+    throw new ErrorClass("Invalid blog ID format", 400);
+  }
+
+  const blog = await Blog.findById(id);
+  if (!blog) {
+    throw new ErrorClass("Blog not found", 404);
+  }
+
+  // Check if user/visitor already liked the blog
+  const existingLikeIndex = blog.likes.findIndex(
+    (like) => like.identifier === userIdentifier
+  );
+
+  let message;
+  let isLiked;
+
+  if (existingLikeIndex !== -1) {
+    // Remove like
+    blog.likes.splice(existingLikeIndex, 1);
+    message = "Like removed";
+    isLiked = false;
+  } else {
+    // Add like
+    blog.likes.push({
+      identifier: userIdentifier,
+      isAuthenticated: isAuthenticated,
+      user: isAuthenticated ? req.user : null,
+      createdAt: new Date(),
+    });
+    message = "Blog liked";
+    isLiked = true;
+  }
+
+  await blog.save();
+
+  res.json({
+    success: true,
+    message: message,
+    data: {
+      likeCount: blog.likes.length,
+      isLiked: isLiked,
+    },
+  });
+});
 
 // Get blog statistics
 export const getBlogStats = async (req, res) => {

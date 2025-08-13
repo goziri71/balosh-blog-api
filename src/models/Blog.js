@@ -74,9 +74,18 @@ const blogSchema = new mongoose.Schema(
     // Engagement
     likes: [
       {
+        identifier: {
+          type: String,
+          required: true,
+        },
+        isAuthenticated: {
+          type: Boolean,
+          default: false,
+        },
         user: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "User",
+          default: null,
         },
         createdAt: {
           type: Date,

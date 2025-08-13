@@ -112,7 +112,7 @@ export const getBlogs = async (req, res) => {
     const {
       page = 1,
       limit = 10,
-      status = "published",
+      status,
       category,
       author,
       search,

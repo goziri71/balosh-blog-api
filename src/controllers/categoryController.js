@@ -1,4 +1,5 @@
 import Category from "../models/Category.js";
+import Blog from "../models/Blog.js";
 import { TryCatchFunction } from "../utils/tryCatch/index.js";
 import { ErrorClass } from "../utils/errorClass/index.js";
 
@@ -40,56 +41,63 @@ export const createCategory = TryCatchFunction(async (req, res) => {
   });
 });
 
-// Get all categories
-export const getCategories = async (req, res) => {
-  try {
-    const { active } = req.query;
+// Get all categories with blog counts
+export const getCategories = TryCatchFunction(async (req, res) => {
+  const { active } = req.query;
 
-    let query = {};
-    if (active === "true") {
-      query.isActive = true;
-    }
-
-    const categories = await Category.find(query).sort({ order: 1, name: 1 });
-
-    res.json({
-      success: true,
-      data: { categories },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error fetching categories",
-      error: error.message,
-    });
+  let query = {};
+  if (active === "true") {
+    query.isActive = true;
   }
-};
 
-// Get single category by ID
-export const getCategoryById = async (req, res) => {
-  try {
-    const { id } = req.params;
+  const categories = await Category.find(query).sort({ order: 1, name: 1 });
 
-    const category = await Category.findById(id);
-    if (!category) {
-      return res.status(404).json({
-        success: false,
-        message: "Category not found",
+  // Get blog count for each category
+  const categoriesWithCounts = await Promise.all(
+    categories.map(async (category) => {
+      const blogCount = await Blog.countDocuments({
+        category: category._id,
+        status: "published", // Only count published blogs
       });
-    }
 
-    res.json({
-      success: true,
-      data: { category },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error fetching category",
-      error: error.message,
-    });
+      return {
+        ...category.toObject(),
+        blogCount: blogCount,
+      };
+    })
+  );
+
+  res.json({
+    success: true,
+    data: { categories: categoriesWithCounts },
+  });
+});
+
+// Get single category by ID with blog count
+export const getCategoryById = TryCatchFunction(async (req, res) => {
+  const { id } = req.params;
+
+  const category = await Category.findById(id);
+  if (!category) {
+    throw new ErrorClass("Category not found", 404);
   }
-};
+
+  // Get blog count for this category
+  const blogCount = await Blog.countDocuments({
+    category: category._id,
+    status: "published", // Only count published blogs
+  });
+
+  const categoryWithCount = {
+    ...category.toObject(),
+    blogCount: blogCount,
+  };
+
+  res.json({
+    success: true,
+    data: { category: categoryWithCount },
+  });
+});
 
 // Update category
 export const updateCategory = async (req, res) => {

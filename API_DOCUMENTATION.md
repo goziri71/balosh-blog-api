@@ -490,6 +490,12 @@ featuredImage: [FILE] (optional - new image/video)
 
 - `active` (boolean): Filter by active status
 
+**Features:**
+
+- Returns all categories with their blog counts
+- Only counts **published blogs** (not drafts)
+- Sorted by `order` then `name`
+
 **Response (200):**
 
 ```json
@@ -505,6 +511,19 @@ featuredImage: [FILE] (optional - new image/video)
         "icon": 1,
         "isActive": true,
         "order": 1,
+        "blogCount": 15,
+        "createdAt": "2023-09-01T10:00:00.000Z",
+        "updatedAt": "2023-09-01T10:00:00.000Z"
+      },
+      {
+        "_id": "64f1a2b3c4d5e6f7g8h9i0j3",
+        "name": "Design",
+        "slug": "design",
+        "description": "Design related posts",
+        "icon": 2,
+        "isActive": true,
+        "order": 2,
+        "blogCount": 8,
         "createdAt": "2023-09-01T10:00:00.000Z",
         "updatedAt": "2023-09-01T10:00:00.000Z"
       }
@@ -518,6 +537,28 @@ featuredImage: [FILE] (optional - new image/video)
 **GET** `/categories/{id}`
 
 - **Public endpoint**
+
+**Response (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "category": {
+      "_id": "64f1a2b3c4d5e6f7g8h9i0j2",
+      "name": "Technology",
+      "slug": "technology",
+      "description": "Tech related posts",
+      "icon": 1,
+      "isActive": true,
+      "order": 1,
+      "blogCount": 15,
+      "createdAt": "2023-09-01T10:00:00.000Z",
+      "updatedAt": "2023-09-01T10:00:00.000Z"
+    }
+  }
+}
+```
 
 ### Create Category
 

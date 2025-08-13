@@ -109,15 +109,16 @@ A comprehensive Node.js/Express backend for a company blog system with user auth
 
 ### 📝 Blog Routes
 
-| Method   | Endpoint          | Description                  | Auth Required |
-| -------- | ----------------- | ---------------------------- | ------------- |
-| `GET`    | `/blogs`          | Get all blogs (with filters) | ❌            |
-| `GET`    | `/blogs/:slug`    | Get blog by slug             | ❌            |
-| `POST`   | `/blogs`          | Create new blog              | ✅ (Author+)  |
-| `PUT`    | `/blogs/:id`      | Update blog                  | ✅ (Author+)  |
-| `DELETE` | `/blogs/:id`      | Delete blog                  | ✅ (Author+)  |
-| `POST`   | `/blogs/:id/like` | Toggle blog like             | ✅            |
-| `GET`    | `/blogs/stats`    | Get blog statistics          | ❌            |
+| Method   | Endpoint           | Description                  | Auth Required |
+| -------- | ------------------ | ---------------------------- | ------------- |
+| `GET`    | `/blogs`           | Get all blogs (with filters) | ❌            |
+| `GET`    | `/blogs/:slug`     | Get blog by slug             | ❌            |
+| `POST`   | `/blogs`           | Create new blog              | ✅ (Author+)  |
+| `PUT`    | `/blogs/:id`       | Update blog                  | ✅ (Author+)  |
+| `DELETE` | `/blogs/:id`       | Delete blog                  | ✅ (Author+)  |
+| `POST`   | `/blogs/:id/like`  | Toggle blog like             | ✅            |
+| `GET`    | `/blogs/:id/likes` | Get blog like details        | ❌            |
+| `GET`    | `/blogs/stats`     | Get blog statistics          | ❌            |
 
 ### 🏷️ Category Routes
 
@@ -129,7 +130,6 @@ A comprehensive Node.js/Express backend for a company blog system with user auth
 | `PUT`    | `/categories/:id`        | Update category        | ✅ (Editor+)  |
 | `DELETE` | `/categories/:id`        | Delete category        | ✅ (Editor+)  |
 | `PUT`    | `/categories/:id/toggle` | Toggle category status | ✅ (Editor+)  |
-| `PUT`    | `/categories/reorder`    | Reorder categories     | ✅ (Editor+)  |
 
 ### 🔍 Utility Routes
 

@@ -615,6 +615,96 @@ export const toggleLike = TryCatchFunction(async (req, res) => {
   });
 });
 
+// Get detailed like information for a blog
+export const getBlogLikes = TryCatchFunction(async (req, res) => {
+  const { id } = req.params;
+
+  // Validate blog ID format
+  if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+    throw new ErrorClass("Invalid blog ID format", 400);
+  }
+
+  const blog = await Blog.findById(id);
+  if (!blog) {
+    throw new ErrorClass("Blog not found", 404);
+  }
+
+  // Get current user's like status
+  let currentUserLiked = false;
+  let currentUserLikeTime = null;
+  let userIdentifier = null;
+
+  if (req.user) {
+    // Authenticated user
+    userIdentifier = req.user.toString();
+  } else {
+    // Anonymous user
+    const clientIP =
+      req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+    const userAgent = req.get("User-Agent") || "";
+    userIdentifier = `anonymous_${Buffer.from(clientIP + userAgent)
+      .toString("base64")
+      .slice(0, 20)}`;
+  }
+
+  // Check if current user liked the blog
+  const currentUserLike = blog.likes.find(
+    (like) => like.identifier === userIdentifier
+  );
+  if (currentUserLike) {
+    currentUserLiked = true;
+    currentUserLikeTime = currentUserLike.createdAt;
+  }
+
+  // Process likes with user information
+  const processedLikes = await Promise.all(
+    blog.likes.map(async (like) => {
+      if (like.isAuthenticated && like.user) {
+        // Get user details for authenticated likes
+        const user = await User.findById(like.user).select(
+          "username firstName lastName profilePhoto"
+        );
+        return {
+          identifier: like.identifier,
+          isAuthenticated: like.isAuthenticated,
+          user: user,
+          createdAt: like.createdAt,
+          displayName: user
+            ? `${user.firstName} ${user.lastName}`
+            : "Unknown User",
+        };
+      } else {
+        // Anonymous like
+        return {
+          identifier: like.identifier,
+          isAuthenticated: like.isAuthenticated,
+          user: null,
+          createdAt: like.createdAt,
+          displayName: "Anonymous User",
+        };
+      }
+    })
+  );
+
+  // Sort likes by creation time (newest first)
+  processedLikes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  const response = {
+    likes: processedLikes,
+    totalLikes: blog.likes.length,
+    authenticatedLikes: blog.likes.filter((like) => like.isAuthenticated)
+      .length,
+    anonymousLikes: blog.likes.filter((like) => !like.isAuthenticated).length,
+    currentUserLiked: currentUserLiked,
+    currentUserLikeTime: currentUserLikeTime,
+  };
+
+  res.json({
+    success: true,
+    data: response,
+  });
+});
+
 // Get blog statistics
 export const getBlogStats = async (req, res) => {
   try {

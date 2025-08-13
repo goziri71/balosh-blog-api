@@ -9,6 +9,7 @@ import {
   deleteBlog,
   toggleLike,
   getBlogStats,
+  getBlogLikes,
 } from "../controllers/blogController.js";
 
 const router = express.Router();
@@ -23,7 +24,8 @@ router.post("/", authorize, uploadBlogMedia, handleMulterError, createBlog);
 router.put("/:id", authorize, uploadBlogMedia, handleMulterError, updateBlog);
 router.delete("/:id", authorize, deleteBlog);
 
-// Public like endpoint - optional authentication (works for both anonymous and logged-in users)
+// Public like endpoints - optional authentication (works for both anonymous and logged-in users)
+router.get("/:id/likes", optionalAuth, getBlogLikes);
 router.post("/:id/like", optionalAuth, toggleLike);
 
 export default router;

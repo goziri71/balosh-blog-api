@@ -262,6 +262,17 @@
           }
         },
         {
+          "name": "Get Blog Likes",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/blogs/BLOG_ID_HERE/likes",
+              "host": ["{{baseUrl}}"],
+              "path": ["blogs", "BLOG_ID_HERE", "likes"]
+            }
+          }
+        },
+        {
           "name": "Get Blog Stats",
           "request": {
             "method": "GET",

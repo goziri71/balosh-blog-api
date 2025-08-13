@@ -519,6 +519,72 @@ Authorization: Bearer <your-token>  // Optional - for authenticated users
 - **Logged-in user** clicks like → uses user ID tracking
 - **Mixed usage** → both types of likes count toward total
 
+### Get Blog Like Details
+
+**GET** `/blogs/{id}/likes`
+
+- **Public endpoint** - No authentication required
+- **Optional authentication** - If user is logged in, shows their like status
+
+**Features:**
+
+- **Detailed like information** - See who liked and when
+- **User identification** - Authenticated users show real names
+- **Anonymous tracking** - Anonymous likes show "Anonymous User"
+- **Current user status** - Shows if current user liked the blog
+- **Privacy safe** - No raw IP addresses exposed
+
+**Headers (Optional):**
+
+```
+Authorization: Bearer <your-token>  // Optional - for authenticated users
+```
+
+**Response (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "likes": [
+      {
+        "identifier": "anonymous_user_1",
+        "isAuthenticated": false,
+        "user": null,
+        "createdAt": "2024-01-15T10:30:00.000Z",
+        "displayName": "Anonymous User"
+      },
+      {
+        "identifier": "64f1a2b3c4d5e6f7g8h9i0j1",
+        "isAuthenticated": true,
+        "user": {
+          "_id": "64f1a2b3c4d5e6f7g8h9i0j1",
+          "username": "john_doe",
+          "firstName": "John",
+          "lastName": "Doe",
+          "profilePhoto": "https://your-supabase-url/storage/v1/object/public/profile-photos/user-id-timestamp.jpg"
+        },
+        "createdAt": "2024-01-15T11:00:00.000Z",
+        "displayName": "John Doe"
+      }
+    ],
+    "totalLikes": 2,
+    "authenticatedLikes": 1,
+    "anonymousLikes": 1,
+    "currentUserLiked": false,
+    "currentUserLikeTime": null
+  }
+}
+```
+
+**Use Cases:**
+
+- **Show like count** - Display total likes on blog
+- **User engagement** - See who's interacting with content
+- **Like history** - Track when likes were added
+- **User recognition** - Show "You liked this" for current user
+- **Social proof** - Display other users who liked the content
+
 ### Get Blog Statistics
 
 **GET** `/blogs/stats`
@@ -560,7 +626,7 @@ Authorization: Bearer <your-token>  // Optional - for authenticated users
 
 - Returns all categories with their blog counts
 - Only counts **published blogs** (not drafts)
-- Sorted by `order` then `name`
+- Sorted by **name** alphabetically
 
 **Response (200):**
 
@@ -576,7 +642,6 @@ Authorization: Bearer <your-token>  // Optional - for authenticated users
         "description": "Tech related posts",
         "icon": 1,
         "isActive": true,
-        "order": 1,
         "blogCount": 15,
         "createdAt": "2023-09-01T10:00:00.000Z",
         "updatedAt": "2023-09-01T10:00:00.000Z"
@@ -588,7 +653,6 @@ Authorization: Bearer <your-token>  // Optional - for authenticated users
         "description": "Design related posts",
         "icon": 2,
         "isActive": true,
-        "order": 2,
         "blogCount": 8,
         "createdAt": "2023-09-01T10:00:00.000Z",
         "updatedAt": "2023-09-01T10:00:00.000Z"
@@ -617,7 +681,6 @@ Authorization: Bearer <your-token>  // Optional - for authenticated users
       "description": "Tech related posts",
       "icon": 1,
       "isActive": true,
-      "order": 1,
       "blogCount": 15,
       "createdAt": "2023-09-01T10:00:00.000Z",
       "updatedAt": "2023-09-01T10:00:00.000Z"
@@ -639,7 +702,7 @@ Authorization: Bearer <your-token>  // Optional - for authenticated users
   "name": "Technology",
   "description": "Tech related posts",
   "icon": 1,
-  "order": 1
+  "isActive": true
 }
 ```
 
@@ -661,26 +724,9 @@ Authorization: Bearer <your-token>  // Optional - for authenticated users
 
 - **Requires:** Bearer token
 
-### Reorder Categories
-
-**PUT** `/categories/reorder`
-
-- **Requires:** Bearer token
-
-**Body:**
-
-```json
-{
-  "categoryOrders": [
-    { "id": "64f1a2b3c4d5e6f7g8h9i0j2", "order": 1 },
-    { "id": "64f1a2b3c4d5e6f7g8h9i0j3", "order": 2 }
-  ]
-}
-```
-
 ---
 
-## 🔍 Utility Endpoints
+## �� Utility Endpoints
 
 ### Health Check
 

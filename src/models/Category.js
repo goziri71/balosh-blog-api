@@ -31,10 +31,6 @@ const categorySchema = new mongoose.Schema(
       min: 1,
       max: 100,
     },
-    order: {
-      type: Number,
-      default: 0,
-    },
   },
   {
     timestamps: true,

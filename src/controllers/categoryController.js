@@ -5,7 +5,7 @@ import { ErrorClass } from "../utils/errorClass/index.js";
 
 // Create new category
 export const createCategory = TryCatchFunction(async (req, res) => {
-  const { name, description, icon, order } = req.body;
+  const { name, description, icon, isActive } = req.body;
 
   if (!name || name.trim() === "") {
     throw new ErrorClass("Category name is required", 400);
@@ -29,7 +29,7 @@ export const createCategory = TryCatchFunction(async (req, res) => {
     slug: slug,
     description: description || "",
     icon: icon || 1,
-    order: order || 0,
+    isActive: isActive !== undefined ? isActive : true, // Default to true if not specified
   });
 
   await category.save();
@@ -50,7 +50,7 @@ export const getCategories = TryCatchFunction(async (req, res) => {
     query.isActive = true;
   }
 
-  const categories = await Category.find(query).sort({ order: 1, name: 1 });
+  const categories = await Category.find(query).sort({ name: 1 });
 
   // Get blog count for each category
   const categoriesWithCounts = await Promise.all(
@@ -100,49 +100,35 @@ export const getCategoryById = TryCatchFunction(async (req, res) => {
 });
 
 // Update category
-export const updateCategory = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, description, color, order, isActive } = req.body;
+export const updateCategory = TryCatchFunction(async (req, res) => {
+  const { id } = req.params;
+  const { name, description, icon, isActive } = req.body;
 
-    const category = await Category.findById(id);
-    if (!category) {
-      return res.status(404).json({
-        success: false,
-        message: "Category not found",
-      });
-    }
-
-    // Check if name is being changed and if it conflicts with existing
-    if (name && name !== category.name) {
-      const existingCategory = await Category.findOne({ name });
-      if (existingCategory) {
-        return res.status(400).json({
-          success: false,
-          message: "Category with this name already exists",
-        });
-      }
-    }
-
-    const updatedCategory = await Category.findByIdAndUpdate(
-      id,
-      { name, description, color, order, isActive },
-      { new: true, runValidators: true }
-    );
-
-    res.json({
-      success: true,
-      message: "Category updated successfully",
-      data: { category: updatedCategory },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error updating category",
-      error: error.message,
-    });
+  const category = await Category.findById(id);
+  if (!category) {
+    throw new ErrorClass("Category not found", 404);
   }
-};
+
+  // Check if name is being changed and if it conflicts with existing
+  if (name && name !== category.name) {
+    const existingCategory = await Category.findOne({ name });
+    if (existingCategory) {
+      throw new ErrorClass("Category with this name already exists", 400);
+    }
+  }
+
+  const updatedCategory = await Category.findByIdAndUpdate(
+    id,
+    { name, description, icon, isActive },
+    { new: true, runValidators: true }
+  );
+
+  res.json({
+    success: true,
+    message: "Category updated successfully",
+    data: { category: updatedCategory },
+  });
+});
 
 // Delete category
 export const deleteCategory = async (req, res) => {
@@ -202,42 +188,6 @@ export const toggleCategoryStatus = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error toggling category status",
-      error: error.message,
-    });
-  }
-};
-
-// Reorder categories
-export const reorderCategories = async (req, res) => {
-  try {
-    const { categoryOrders } = req.body; // Array of { id, order }
-
-    if (!Array.isArray(categoryOrders)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid category orders format",
-      });
-    }
-
-    // Update each category's order
-    const updatePromises = categoryOrders.map(({ id, order }) =>
-      Category.findByIdAndUpdate(id, { order }, { new: true })
-    );
-
-    await Promise.all(updatePromises);
-
-    // Fetch updated categories
-    const categories = await Category.find().sort({ order: 1, name: 1 });
-
-    res.json({
-      success: true,
-      message: "Categories reordered successfully",
-      data: { categories },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error reordering categories",
       error: error.message,
     });
   }

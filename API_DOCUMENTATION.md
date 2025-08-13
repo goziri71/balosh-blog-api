@@ -466,6 +466,14 @@ featuredImage: [FILE] (optional - new image/video)
 
 **Note:** All fields are optional. Only provide fields you want to update.
 
+**Features:**
+
+- **Smart Image Handling**: When uploading a new featured image, the old image is automatically deleted from Supabase
+- **Unique Slug Generation**: If title is updated, a new unique slug is generated automatically
+- **Selective Updates**: Only provided fields are updated, others remain unchanged
+- **Validation**: Same validation rules as create blog apply
+- **Auto-publish Date**: If status changes from draft to published, publishDate is set automatically
+
 ### Delete Blog
 
 **DELETE** `/blogs/{id}`

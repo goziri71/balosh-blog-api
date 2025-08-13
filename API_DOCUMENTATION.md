@@ -348,6 +348,16 @@ featuredImage: [FILE] (image/video - JPEG, PNG, WebP, GIF, MP4, WebM, OGG)
 }
 ```
 
+**Validation Rules:**
+
+- `title`: Required, max 200 characters
+- `content`: Required, min 10 characters
+- `category`: Required, valid MongoDB ObjectId
+- `excerpt`: Optional, max 300 characters
+- `status`: Optional, must be "draft" or "published"
+- `tags`: Optional, comma-separated string
+- `featuredImage`: Optional, images (max 10MB) or videos (max 100MB)
+
 **Response (201):**
 
 ```json
@@ -386,6 +396,34 @@ featuredImage: [FILE] (image/video - JPEG, PNG, WebP, GIF, MP4, WebM, OGG)
       "updatedAt": "2025-08-12T10:00:00.000Z"
     }
   }
+}
+```
+
+**Possible Errors:**
+
+```json
+// Duplicate title (slug conflict)
+{
+  "success": false,
+  "message": "slug 'my-blog-post' already exists. Please choose a different title."
+}
+
+// Validation errors
+{
+  "success": false,
+  "message": "Blog title must be less than 200 characters"
+}
+
+// Invalid category
+{
+  "success": false,
+  "message": "Category not found"
+}
+
+// File upload errors
+{
+  "success": false,
+  "message": "Image size must be less than 10MB"
 }
 ```
 

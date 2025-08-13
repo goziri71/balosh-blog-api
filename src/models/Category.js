@@ -25,6 +25,12 @@ const categorySchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    icon: {
+      type: Number,
+      default: 1,
+      min: 1,
+      max: 100,
+    },
     order: {
       type: Number,
       default: 0,

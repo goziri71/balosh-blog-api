@@ -1,41 +1,44 @@
 import Category from "../models/Category.js";
+import { TryCatchFunction } from "../utils/tryCatch/index.js";
+import { ErrorClass } from "../utils/errorClass/index.js";
 
 // Create new category
-export const createCategory = async (req, res) => {
-  try {
-    const { name, description, color, order } = req.body;
+export const createCategory = TryCatchFunction(async (req, res) => {
+  const { name, description, icon, order } = req.body;
 
-    // Check if category already exists
-    const existingCategory = await Category.findOne({ name });
-    if (existingCategory) {
-      return res.status(400).json({
-        success: false,
-        message: "Category with this name already exists",
-      });
-    }
-
-    const category = new Category({
-      name,
-      description: description || "",
-      color: color || "#3B82F6",
-      order: order || 0,
-    });
-
-    await category.save();
-
-    res.status(201).json({
-      success: true,
-      message: "Category created successfully",
-      data: { category },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error creating category",
-      error: error.message,
-    });
+  if (!name || name.trim() === "") {
+    throw new ErrorClass("Category name is required", 400);
   }
-};
+
+  // Check if category already exists
+  const existingCategory = await Category.findOne({ name });
+  if (existingCategory) {
+    throw new ErrorClass("Category with this name already exists", 400);
+  }
+
+  // Generate slug from name
+  const slug = name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+  const category = new Category({
+    name: name.trim(),
+    slug: slug,
+    description: description || "",
+    icon: icon || 1,
+    order: order || 0,
+  });
+
+  await category.save();
+
+  res.status(201).json({
+    success: true,
+    message: "Category created successfully",
+    data: { category },
+  });
+});
 
 // Get all categories
 export const getCategories = async (req, res) => {

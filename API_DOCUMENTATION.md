@@ -1,5 +1,18 @@
 # 📚 Balosh Blog API Documentation
 
+A modern blog API built with Node.js, Express, MongoDB, and Supabase for media storage.
+
+## 🌟 Key Features
+
+- **🔐 JWT Authentication** - Secure user authentication and authorization
+- **📝 Rich Blog Management** - Create, read, update, delete blogs with HTML content
+- **🏷️ Category System** - Organize blogs with icons and custom ordering
+- **📁 Supabase Integration** - Seamless file uploads for profile photos and blog media
+- **🎯 SEO Optimized** - Built-in meta tags and SEO-friendly URLs
+- **📱 Mobile Ready** - Designed for modern frontend frameworks
+- **🔍 Search & Filter** - Advanced blog filtering and pagination
+- **❤️ Engagement** - Like system and view tracking
+
 ## Base URL
 
 ```
@@ -112,7 +125,19 @@ Authorization: Bearer <your-jwt-token>
 
 - **Requires:** Bearer token
 
-**Body:**
+**Content-Type:** `multipart/form-data` (for photo uploads) or `application/json` (for text updates)
+
+**Body (Form Data for Photo Upload):**
+
+```
+firstName: "John"
+lastName: "Doe Updated"
+bio: "Updated bio"
+username: "newusername"
+profilePhoto: [FILE] (image file - JPEG, PNG, WebP, max 5MB)
+```
+
+**Body (JSON for Text Only):**
 
 ```json
 {
@@ -120,6 +145,29 @@ Authorization: Bearer <your-jwt-token>
   "lastName": "Doe Updated",
   "bio": "Updated bio",
   "username": "newusername"
+}
+```
+
+**Response (200):**
+
+```json
+{
+  "success": true,
+  "message": "Profile updated successfully",
+  "data": {
+    "user": {
+      "_id": "64f1a2b3c4d5e6f7g8h9i0j1",
+      "username": "johndoe",
+      "email": "john@example.com",
+      "firstName": "John",
+      "lastName": "Doe Updated",
+      "bio": "Updated bio",
+      "profilePhoto": "https://your-supabase-url/storage/v1/object/public/profile-photos/profiles/user-id-timestamp.jpg",
+      "lastLogin": "2023-09-01T10:00:00.000Z",
+      "createdAt": "2023-09-01T10:00:00.000Z",
+      "updatedAt": "2023-09-01T10:00:00.000Z"
+    }
+  }
 }
 ```
 
@@ -178,7 +226,7 @@ GET /blogs?page=1&limit=5&search=nodejs&sortBy=createdAt&sortOrder=desc
         "slug": "getting-started-with-node-js",
         "content": "Node.js is a powerful...",
         "excerpt": "Learn the basics...",
-        "featuredImage": "",
+        "featuredImage": "https://your-supabase-url/storage/v1/object/public/blog-media/blogs/user-id-timestamp.jpg",
         "author": {
           "_id": "64f1a2b3c4d5e6f7g8h9i0j0",
           "username": "johndoe",
@@ -189,7 +237,7 @@ GET /blogs?page=1&limit=5&search=nodejs&sortBy=createdAt&sortOrder=desc
         "category": {
           "_id": "64f1a2b3c4d5e6f7g8h9i0j2",
           "name": "Technology",
-          "color": "#3B82F6"
+          "icon": 1
         },
         "tags": ["nodejs", "javascript", "backend"],
         "status": "published",
@@ -230,7 +278,34 @@ GET /blogs?page=1&limit=5&search=nodejs&sortBy=createdAt&sortOrder=desc
   "success": true,
   "data": {
     "blog": {
-      /* full blog object with author and category populated */
+      "_id": "64f1a2b3c4d5e6f7g8h9i0j1",
+      "title": "Getting Started with Node.js",
+      "slug": "getting-started-with-node-js",
+      "content": "<p>Node.js is a powerful <strong>JavaScript runtime</strong> that allows developers...</p>",
+      "excerpt": "Learn the basics of Node.js development",
+      "featuredImage": "https://your-supabase-url/storage/v1/object/public/blog-media/blogs/user-id-timestamp.jpg",
+      "author": {
+        "_id": "689b0ef7c2a558028a03eab9",
+        "username": "zee71",
+        "firstName": "goziri",
+        "lastName": "odinaka",
+        "profilePhoto": ""
+      },
+      "category": {
+        "_id": "64f1a2b3c4d5e6f7g8h9i0j2",
+        "name": "Technology",
+        "icon": 1
+      },
+      "tags": ["nodejs", "javascript", "backend"],
+      "status": "published",
+      "publishDate": "2025-08-12T10:00:00.000Z",
+      "metaTitle": "Node.js Tutorial",
+      "metaDescription": "Complete guide to Node.js development",
+      "likes": [],
+      "views": 150,
+      "readTime": 5,
+      "createdAt": "2025-08-12T10:00:00.000Z",
+      "updatedAt": "2025-08-12T10:00:00.000Z"
     }
   }
 }
@@ -242,21 +317,34 @@ GET /blogs?page=1&limit=5&search=nodejs&sortBy=createdAt&sortOrder=desc
 
 - **Requires:** Bearer token
 
-**Body:**
+**Content-Type:** `multipart/form-data` (for file uploads) or `application/json` (text only)
+
+**Body (Form Data with Featured Image):**
+
+```
+title: "My New Blog Post"
+content: "<p>This is the <strong>HTML content</strong> from rich text editor.</p>"
+excerpt: "Short description"
+category: "64f1a2b3c4d5e6f7g8h9i0j2"
+tags: "javascript, tutorial, nodejs"
+status: "draft"
+metaTitle: "SEO Title"
+metaDescription: "SEO Description"
+featuredImage: [FILE] (image/video - JPEG, PNG, WebP, GIF, MP4, WebM, OGG)
+```
+
+**Body (JSON - Text Only):**
 
 ```json
 {
   "title": "My New Blog Post",
-  "content": "This is the content of my blog post...",
+  "content": "<p>This is the <strong>HTML content</strong> from rich text editor.</p>",
   "excerpt": "Short description",
   "category": "64f1a2b3c4d5e6f7g8h9i0j2",
-  "tags": ["javascript", "tutorial"],
+  "tags": "javascript, tutorial, nodejs",
   "status": "draft",
   "metaTitle": "SEO Title",
-  "metaDescription": "SEO Description",
-  "metaKeywords": ["javascript", "tutorial"],
-  "isFeatured": false,
-  "allowComments": true
+  "metaDescription": "SEO Description"
 }
 ```
 
@@ -268,7 +356,34 @@ GET /blogs?page=1&limit=5&search=nodejs&sortBy=createdAt&sortOrder=desc
   "message": "Blog created successfully",
   "data": {
     "blog": {
-      /* created blog object */
+      "_id": "64f1a2b3c4d5e6f7g8h9i0j1",
+      "title": "My New Blog Post",
+      "slug": "my-new-blog-post",
+      "content": "<p>This is the <strong>HTML content</strong> from rich text editor.</p>",
+      "excerpt": "Short description",
+      "featuredImage": "https://your-supabase-url/storage/v1/object/public/blog-media/blogs/user-id-timestamp.jpg",
+      "author": {
+        "_id": "689b0ef7c2a558028a03eab9",
+        "username": "zee71",
+        "firstName": "goziri",
+        "lastName": "odinaka",
+        "profilePhoto": ""
+      },
+      "category": {
+        "_id": "64f1a2b3c4d5e6f7g8h9i0j2",
+        "name": "Technology",
+        "icon": 1
+      },
+      "tags": ["javascript", "tutorial", "nodejs"],
+      "status": "draft",
+      "publishDate": null,
+      "metaTitle": "SEO Title",
+      "metaDescription": "SEO Description",
+      "likes": [],
+      "views": 0,
+      "readTime": 2,
+      "createdAt": "2025-08-12T10:00:00.000Z",
+      "updatedAt": "2025-08-12T10:00:00.000Z"
     }
   }
 }
@@ -280,7 +395,38 @@ GET /blogs?page=1&limit=5&search=nodejs&sortBy=createdAt&sortOrder=desc
 
 - **Requires:** Bearer token
 
-**Body:** (same as create, all fields optional)
+**Content-Type:** `multipart/form-data` (for file uploads) or `application/json` (text only)
+
+**Body (Form Data with Featured Image):**
+
+```
+title: "Updated Blog Title"
+content: "<p>Updated <strong>HTML content</strong></p>"
+excerpt: "Updated description"
+category: "64f1a2b3c4d5e6f7g8h9i0j2"
+tags: "updated, tags, list"
+status: "published"
+metaTitle: "Updated SEO Title"
+metaDescription: "Updated SEO Description"
+featuredImage: [FILE] (optional - new image/video)
+```
+
+**Body (JSON - Text Only):**
+
+```json
+{
+  "title": "Updated Blog Title",
+  "content": "<p>Updated <strong>HTML content</strong></p>",
+  "excerpt": "Updated description",
+  "category": "64f1a2b3c4d5e6f7g8h9i0j2",
+  "tags": "updated, tags, list",
+  "status": "published",
+  "metaTitle": "Updated SEO Title",
+  "metaDescription": "Updated SEO Description"
+}
+```
+
+**Note:** All fields are optional. Only provide fields you want to update.
 
 ### Delete Blog
 
@@ -356,7 +502,7 @@ GET /blogs?page=1&limit=5&search=nodejs&sortBy=createdAt&sortOrder=desc
         "name": "Technology",
         "slug": "technology",
         "description": "Tech related posts",
-        "color": "#3B82F6",
+        "icon": 1,
         "isActive": true,
         "order": 1,
         "createdAt": "2023-09-01T10:00:00.000Z",
@@ -385,7 +531,7 @@ GET /blogs?page=1&limit=5&search=nodejs&sortBy=createdAt&sortOrder=desc
 {
   "name": "Technology",
   "description": "Tech related posts",
-  "color": "#3B82F6",
+  "icon": 1,
   "order": 1
 }
 ```
@@ -491,6 +637,37 @@ All errors follow this format:
 
 Import this collection for easy testing: [Coming Soon]
 
+## 📁 File Upload & Media Management
+
+### Supabase Integration
+
+This API uses Supabase for file storage with two main buckets:
+
+- **`profile-photos`** - User profile pictures
+- **`blog-media`** - Blog featured images and videos
+
+### File Upload Limits
+
+**Profile Photos:**
+
+- **Types:** JPEG, PNG, WebP
+- **Size:** Max 5MB
+
+**Blog Media:**
+
+- **Images:** JPEG, PNG, WebP, GIF (Max 10MB)
+- **Videos:** MP4, WebM, OGG (Max 100MB)
+
+### File URLs
+
+All uploaded files return Supabase public URLs:
+
+```
+https://your-project-id.supabase.co/storage/v1/object/public/bucket-name/path/filename.ext
+```
+
+---
+
 ## 🛠️ Frontend Integration
 
 ### Authentication Flow:
@@ -500,17 +677,63 @@ Import this collection for easy testing: [Coming Soon]
 3. Redirect to login if you receive 401 responses
 4. Refresh token before expiry (24 hours)
 
-### Example Frontend Code:
+### File Upload Examples:
+
+**Profile Photo Update:**
+
+```javascript
+const formData = new FormData();
+formData.append("firstName", "John");
+formData.append("lastName", "Doe");
+formData.append("profilePhoto", fileInput.files[0]);
+
+fetch("/api/v1/auth/profile", {
+  method: "PUT",
+  headers: {
+    Authorization: `Bearer ${token}`,
+    // Don't set Content-Type for FormData
+  },
+  body: formData,
+});
+```
+
+**Blog Creation with Featured Image:**
+
+```javascript
+const formData = new FormData();
+formData.append("title", "My Blog Post");
+formData.append("content", "<p>Rich HTML content</p>");
+formData.append("category", categoryId);
+formData.append("tags", "tag1, tag2, tag3");
+formData.append("status", "published");
+formData.append("featuredImage", imageFile);
+
+fetch("/api/v1/blogs", {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+  body: formData,
+});
+```
+
+### API Call Examples:
 
 ```javascript
 // Set token
 localStorage.setItem("token", data.token);
 
-// API call with token
+// Text-only API call
 fetch("/api/v1/blogs", {
+  method: "POST",
   headers: {
     Authorization: `Bearer ${localStorage.getItem("token")}`,
     "Content-Type": "application/json",
   },
+  body: JSON.stringify({
+    title: "My Blog",
+    content: "<p>HTML content</p>",
+    category: "category_id",
+  }),
 });
 ```

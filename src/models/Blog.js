@@ -10,10 +10,10 @@ const blogSchema = new mongoose.Schema(
     },
     slug: {
       type: String,
-      required: true,
       unique: true,
       lowercase: true,
       trim: true,
+      required: false, // Generated automatically
     },
     content: {
       type: String,
@@ -128,6 +128,17 @@ blogSchema.virtual("autoExcerpt").get(function () {
   return (
     this.content.substring(0, 300) + (this.content.length > 300 ? "..." : "")
   );
+});
+
+// Create slug from title before saving
+blogSchema.pre("save", function (next) {
+  if (this.title && (!this.slug || this.isModified("title"))) {
+    this.slug = this.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  }
+  next();
 });
 
 // Ensure virtual fields are serialized

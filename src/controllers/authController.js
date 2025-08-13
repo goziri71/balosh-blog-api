@@ -1,10 +1,12 @@
 import User from "../models/User.js";
 import { AuthService } from "../service/auth.service.js";
+import { UploadService } from "../service/upload.service.js";
 import { TryCatchFunction } from "../utils/tryCatch/index.js";
 import { ErrorClass } from "../utils/errorClass/index.js";
 import { Config } from "../config/index.js";
 
 const authService = new AuthService();
+const uploadService = new UploadService();
 
 // Register new user
 export const register = TryCatchFunction(async (req, res) => {
@@ -16,12 +18,7 @@ export const register = TryCatchFunction(async (req, res) => {
   });
 
   if (existingUser) {
-    throw new ErrorClass(
-      existingUser.email === email
-        ? "Email already registered"
-        : "Username already taken",
-      400
-    );
+    throw new ErrorClass("user already exists", 409);
   }
 
   // Create new user
@@ -100,46 +97,64 @@ export const getProfile = TryCatchFunction(async (req, res) => {
 });
 
 // Update user profile
-export const updateProfile = async (req, res) => {
-  try {
-    const { firstName, lastName, bio, username } = req.body;
-    const updateData = {};
+export const updateProfile = TryCatchFunction(async (req, res) => {
+  const { firstName, lastName, bio, username } = req.body;
+  const updateData = {};
 
-    // Only allow updating certain fields
-    if (firstName) updateData.firstName = firstName;
-    if (lastName) updateData.lastName = lastName;
-    if (bio !== undefined) updateData.bio = bio;
+  // Handle profile photo upload if file is provided
+  if (req.file) {
+    // Validate the uploaded file
+    uploadService.validateProfilePhoto(req.file);
 
-    // Check username uniqueness if changing
-    if (username && username !== req.user.username) {
+    // Get current user to check existing profile photo
+    const currentUser = await User.findById(req.user);
+
+    // Upload new profile photo
+    const uploadResult = await uploadService.uploadProfilePhoto(
+      req.file,
+      req.user
+    );
+    updateData.profilePhoto = uploadResult.url;
+
+    // Delete old profile photo if it exists
+    if (
+      currentUser.profilePhoto &&
+      currentUser.profilePhoto.includes("supabase")
+    ) {
+      // Extract file path from URL to delete old photo
+      const oldPath = currentUser.profilePhoto.split("/").slice(-2).join("/");
+      await uploadService.deleteProfilePhoto(oldPath);
+    }
+  }
+
+  // Only allow updating certain fields
+  if (firstName) updateData.firstName = firstName;
+  if (lastName) updateData.lastName = lastName;
+  if (bio !== undefined) updateData.bio = bio;
+
+  // Check username uniqueness if changing
+  if (username) {
+    const currentUser = await User.findById(req.user);
+    if (username !== currentUser.username) {
       const existingUser = await User.findOne({ username });
       if (existingUser) {
-        return res.status(400).json({
-          success: false,
-          message: "Username already taken",
-        });
+        throw new ErrorClass("Username already taken", 400);
       }
       updateData.username = username;
     }
-
-    const user = await User.findByIdAndUpdate(req.user._id, updateData, {
-      new: true,
-      runValidators: true,
-    }).select("-password");
-
-    res.json({
-      success: true,
-      message: "Profile updated successfully",
-      data: { user },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error updating profile",
-      error: error.message,
-    });
   }
-};
+
+  const user = await User.findByIdAndUpdate(req.user, updateData, {
+    new: true,
+    runValidators: true,
+  }).select("-password");
+
+  res.json({
+    success: true,
+    message: "Profile updated successfully",
+    data: { user },
+  });
+});
 
 // Change password
 export const changePassword = async (req, res) => {

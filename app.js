@@ -6,6 +6,7 @@ import { ErrorHandlerMiddleware } from "./src/middleware/errorHandler.js";
 import authRouter from "./src/routes/auth.js";
 import blogRouter from "./src/routes/blogs.js";
 import categoryRouter from "./src/routes/categories.js";
+import careerRouter from "./src/routes/careers.js";
 
 const app = express();
 const port = Config.PORT;
@@ -21,6 +22,7 @@ app.use(cors());
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/blogs", blogRouter);
 app.use("/api/v1/categories", categoryRouter);
+app.use("/api/v1/careers", careerRouter);
 
 // Health check endpoint
 app.get("/health", (req, res) => {

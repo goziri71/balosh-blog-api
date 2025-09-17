@@ -2,6 +2,7 @@ import express from "express";
 import authRoutes from "./auth.js";
 import blogRoutes from "./blogs.js";
 import categoryRoutes from "./categories.js";
+import careerRoutes from "./careers.js";
 
 const router = express.Router();
 
@@ -12,6 +13,7 @@ const API_PREFIX = "/api/v1";
 router.use(`${API_PREFIX}/auth`, authRoutes);
 router.use(`${API_PREFIX}/blogs`, blogRoutes);
 router.use(`${API_PREFIX}/categories`, categoryRoutes);
+router.use(`${API_PREFIX}/careers`, careerRoutes);
 
 // Health check endpoint
 router.get("/health", (req, res) => {

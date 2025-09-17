@@ -39,6 +39,19 @@ const blogMediaFilter = (req, file, cb) => {
   }
 };
 
+// Careers CV filter (PDF only)
+const careerCvFilter = (req, file, cb) => {
+  const allowedTypes = /pdf/;
+  const extname = allowedTypes.test(file.originalname.toLowerCase());
+  const mimetype = file.mimetype === "application/pdf";
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb(new ErrorClass("Only PDF files are allowed for CV upload", 400), false);
+  }
+};
+
 // Profile photo upload
 const profileUpload = multer({
   storage: storage,
@@ -57,14 +70,24 @@ const blogUpload = multer({
   fileFilter: blogMediaFilter,
 });
 
+// Career CV upload
+const careerCvUpload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit for CVs
+  },
+  fileFilter: careerCvFilter,
+});
+
 export const uploadSingle = profileUpload.single("profilePhoto");
 export const uploadBlogMedia = blogUpload.single("featuredImage");
+export const uploadCareerCv = careerCvUpload.single("cv");
 
 // Error handling middleware for multer
 export const handleMulterError = (error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     if (error.code === "LIMIT_FILE_SIZE") {
-      return next(new ErrorClass("File too large. Maximum size is 5MB", 400));
+      return next(new ErrorClass("File too large.", 400));
     }
   }
 

@@ -530,6 +530,18 @@ export const deleteBlog = async (req, res) => {
     }
 
     // Anyone with JWT can delete (simplified)
+    // Attempt to delete associated featured media if it exists in Supabase
+    if (blog.featuredImage && blog.featuredImage.includes("supabase")) {
+      try {
+        const urlParts = blog.featuredImage.split("/");
+        const fileName = urlParts[urlParts.length - 1];
+        const filePath = `blogs/${fileName}`;
+        await uploadService.deleteBlogMedia(filePath);
+      } catch (e) {
+        // Log and continue; deletion failure of media shouldn't block blog deletion
+        console.error("Failed to delete blog media:", e?.message || e);
+      }
+    }
 
     await Blog.findByIdAndDelete(id);
 
